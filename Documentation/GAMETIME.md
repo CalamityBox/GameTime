@@ -732,3 +732,38 @@ equal to this `Duration`.
 Converts a `Duration` into its absolute value. If the timespan is zero or positive, then
 `myDuration` is equal to `myDuration.Abs()`. If the timespan is negative, then
 `myDuration` is equal to `-1 * myDuration.Abs()`.
+
+### Constants
+
+Depending on the needs of your game, it may be common to perform operations on a `Duration`
+or `TimeOnly` in standard intervals of a unit, such as one day or one hour. For example,
+there may be a cutscene that should advance in-game time by three hours upon completion,
+or a "time trials" race where the player must beat a time of 5 minutes. Therefore, the 
+`Duration` struct provides the following constants:
+
+|         Constant          |             Value             |
+|:-------------------------:|:-----------------------------:|
+|      `Duration.Zero`      |       `new Duration(0)`       |
+| `Duration.OneMillisecond` |       `new Duration(1)`       |
+|   `Duration.OneSecond`    |    `new Duration(0, 0, 1)`    |
+|   `Duration.OneMinute`    |     `new Duration(0, 1)`      |
+|    `Duration.OneHour`     |     `new Duration(1, 0)`      |
+|     `Duration.OneDay`     | `new Duration(1, 0, 0, 0, 0)` |
+
+#### Example
+
+```csharp
+public class TeamTrialsManager : Monobehavior 
+{
+    
+    private Duration _passingTime = 5 * Duration.OneMinute;
+    
+    // ... rest of the class
+    
+    private void IsPassingTime(Duration playerTime)
+    {
+        return playerTime <= _passingTime;
+    }
+    
+}
+```

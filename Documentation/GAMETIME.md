@@ -18,17 +18,15 @@ displays times as "8 AM" and invokes events only when the hour changes, or a clo
 and invokes events whenever the hour or minute changes. Therefore, the ```Clock``` is arranged into several 
 classes of varying levels of time specificity that are created with sensible defaults.
 
-### General Usage
-
-#### Constructor
+### Constructor
 
 The ```BaseClock``` is an abstract class and thus cannot be initialized. However, every inheriting clock has
 the same constructor which accepts a ```TimeOnly``` starting time and an optional ```string``` parameter to
 set the default format of the clock.
 
-#### Events
+### Events
 
-##### OnTimeChanged
+#### OnTimeChanged
 
 The ```OnTimeChanged``` event invokes when the ```Time``` property changes at the level of specificity set
 by the inheriting class. For example, ```HourClock.OnTimeChanged``` event will only invoke when the ```Hour```
@@ -77,13 +75,13 @@ public class MyGameObject
 }
 ```
 
-#### Properties
+### Properties
 
-##### Time
+#### Time
 
 A ```TimeOnly``` that represents the current time recorded by the clock.
 
-##### Format
+#### Format
 
 A ```string``` that represents the default format of the clock when the ```ToString``` method is invoked
 without a ```format``` provided or when it is called implicitly in a template string, such as
@@ -98,99 +96,99 @@ Debug.Log($"{_clock}"); // Prints "9:45 AM" to the console
 
 Every clock stores the full-precision time, and can therefore display the time in any format.
 
-### HourClock
+## HourClock
 
 The ```HourClock``` is a clock whose specified level of precision is the ```Hour``` component of ```Time```. 
 An example of where this class could be used is *Five Night's At Freddy's*. The game builds tension by only 
 displaying the hour of the time because it is more stressful for the player to not know the exact amount of 
 time remaining in the day.
 
-#### Events
+### Events
 
-##### OnTimeChanged
+#### OnTimeChanged
 
 The ```OnTimeChanged``` event of an ```HourClock``` will only invoke when the ```Hour``` component of
 ```Time``` has changed.
 
-##### OnHourChanged
+#### OnHourChanged
 
 The ```OnHourChanged``` event will invoke whenever the ```Hour``` component of ```Time``` has changed. The
 ```HourClock``` is unique in that the ```OnHourChanged``` event is functionally equivalent to the
 ```OnTimeChanged``` event.
 
-### MinuteClock
+## MinuteClock
 
 The ```MinuteClock``` is a clock whose specified level of precision is the ```Hour``` and ```Minute``` 
 components of ```Time```. An example of where this class could be used is *Stardew Valley*. The time
 displayed to the user only shows the hour and minute, and NPC scheduled activities update on hour
 and minute level precision.
 
-#### Events
+### Events
 
-##### OnTimeChanged
+#### OnTimeChanged
 
 The ```OnTimeChanged``` event of a ```MinuteClock``` will invoke when the ```Hour``` or ```Minute``` components
 of ```Time``` have changed.
 
-##### OnHourChanged
+#### OnHourChanged
 
 The ```MinuteClock``` has access to the ```OnHourChanged``` event of the ```HourClock```.
 
-##### OnMinuteChanged
+#### OnMinuteChanged
 
 The ```OnMinuteChanged``` event will invoke whenever the ```Minute``` component of ```Time``` has changed.
 
-### SecondClock
+## SecondClock
 
 The ```SecondClock``` is a clock whose specified level of precision is the ```Hour```, ```Minute```,
 and ```Second``` components of ```Time```.
 
-#### Events
+### Events
 
-##### OnTimeChanged
+#### OnTimeChanged
 
 The ```OnTimeChanged``` event of a ```SecondClock``` will invoke when the ```Hour```, ```Minute```, 
 or ```Second``` components of ```Time``` have changed.
 
-##### OnHourChanged
+#### OnHourChanged
 
 The ```SecondClock``` has access to the ```OnHourChanged``` event of the ```HourClock```.
 
-##### OnMinuteChanged
+#### OnMinuteChanged
 
 The ```SecondClock``` has access to the ```OnMinuteChanged``` event of the ```OnMinuteChanged```.
 
-#### OnSecondChanged
+### OnSecondChanged
 
 The ```OnSecondChanged``` event will invoke whenever the ```Second``` component of ```Time``` has changed.
 
-### MillisecondClock
+## MillisecondClock
 
 The ```MillisecondClock``` is a clock whose specified level of precision is the ```Hour```, ```Minute```,
 ```Second```, and ```Millisecond``` components of ```Time```.
 
-#### Events
+### Events
 
-##### OnTimeChanged
+#### OnTimeChanged
 
 The ```OnTimeChanged``` event of a ```SecondClock``` will invoke when the ```Hour```, ```Minute```,
 ```Second```, or ```Millisecond``` components of ```Time``` have changed. The ```Millisecond``` clock
 is unique in that the ```OnTimeChanged``` event is equivalent to any change in the ```Time```
 property.
 
-##### OnHourChanged
+#### OnHourChanged
 
 The ```MillisecondClock``` has access to the ```OnHourChanged``` event of the ```HourClock```.
 
-##### OnMinuteChanged
+#### OnMinuteChanged
 
 The ```MillisecondClock``` has access to the ```OnMinuteChanged``` event of the ```MinuteClock```.
 
-#### OnSecondChanged
+### OnSecondChanged
 
 The ```MillisecondClock``` has access to the ```OnSecondChanged``` event of the ```SecondClock```.
 
-#### OnMillisecondChanged
+### OnMillisecondChanged
 
 The ```OnMillisecondChanged``` event will invoke whenever the ```Millisecond``` component of ```Time``` has changed.
 

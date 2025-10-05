@@ -186,7 +186,7 @@ namespace GameTime
         /// <returns>
         /// <c>true</c> if the <c>Hour</c> is less than 12. Returns <c>false</c> otherwise.
         /// </returns>
-        public bool IsMorning() => Hour < 12;
+        public bool IsMorning() => this < Time_12_00;
 
         /// <summary>
         /// Retrieves the 12-hour time suffix.

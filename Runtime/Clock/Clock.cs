@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace GameTime.Clock
 {
@@ -36,8 +37,7 @@ namespace GameTime.Clock
             protected set
             {
                 HandleSetterEvents(value, out bool isTimeChanged);
-                if (!isTimeChanged) return;
-                OnTimeChanged?.Invoke(this, new OnTimeChangedEventArgs{ Time = value,  TimeString = Time.ToString(Format) });
+                if (isTimeChanged) OnTimeChanged?.Invoke(this, new OnTimeChangedEventArgs { Time = value, TimeString = value.ToString(Format) });
                 _time = value;
             }
         }

@@ -178,7 +178,7 @@ namespace GameTime
         /// Computes the proportion of the day completed relative to midnight.
         /// </summary>
         /// <returns>A float between [0,1) that represents the proportion of the day completed.</returns>
-        public float GetDayProgress() => (float)NUM_MILLISECONDS_PER_DAY / BackingTime;
+        public float GetDayProgress() => (float)BackingTime / NUM_MILLISECONDS_PER_DAY;
         
         /// <summary>
         /// Determines if it is morning.

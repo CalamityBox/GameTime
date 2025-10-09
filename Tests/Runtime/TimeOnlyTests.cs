@@ -215,6 +215,21 @@ namespace Tests.Runtime
         }
 
         [Test]
+        public void TestGetDayProgress()
+        {
+            float tolerance = 0.00001f;
+            
+            Assert.That(Time_0_00.GetDayProgress(), Is.EqualTo(0f));
+            Assert.That(Time_1_00.GetDayProgress(), Is.EqualTo(0.04167f).Within(tolerance));
+            Assert.That(Time_3_30.GetDayProgress(), Is.EqualTo(0.14583f).Within(tolerance));
+            Assert.That(Time_7_00.GetDayProgress(), Is.EqualTo(0.29167f).Within(tolerance));
+            Assert.That(Time_12_00.GetDayProgress(), Is.EqualTo(0.5f).Within(tolerance));
+            Assert.That(Time_16_30.GetDayProgress(), Is.EqualTo(0.6875f).Within(tolerance));
+            Assert.That(Time_19_00.GetDayProgress(), Is.EqualTo(0.79167f).Within(tolerance));
+            Assert.That(Time_23_30.GetDayProgress(), Is.EqualTo(0.97917f).Within(tolerance));
+        }
+
+        [Test]
         public void TestStringFormatting()
         {
             Assert.That($"{Time_0_00:HH:mm:ss:fff}", Is.EqualTo("00:00:00:000"));

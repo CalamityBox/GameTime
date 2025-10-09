@@ -16,3 +16,7 @@ A ```struct``` that records the time and allows times to be compared, added to, 
 
 A ```struct``` that represents a span of time, such as 36 hours or -23 days. This can be used to determine the time
 between ```TimeOnly``` values, add or subtract time from a ```TimeOnly```, record the length of tasks, and so on.
+
+# AI non-usage
+
+This library was written without the use of generative AI models.

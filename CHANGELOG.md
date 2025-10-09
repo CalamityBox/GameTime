@@ -2,6 +2,11 @@
 
 ### Changes
 
+Implemented the following fixes to the `TimeOnly` class:
+
+- Fixed a mistake where the numerator and denominator of the `GetDayProgress` method were switched.
+- Added missing unit tests for the `GetDayProgress` method.
+
 Added the following properties to the `OnTimeChangedEventArgs` class:
 
 - `PreviousTime`: A `TimeOnly` representing the time at the frame before the event was invoked.

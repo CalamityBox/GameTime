@@ -8,15 +8,67 @@ namespace GameTime.Clock
         
         public class OnTimeChangedEventArgs : EventArgs
         {
+            
             /// <summary>
             /// The <c>TimeOnly</c> value of the clock when the event was invoked.
             /// </summary>
             public TimeOnly Time;
+            
+            /// <summary>
+            /// The previous <c>TimeOnly</c> value of the clock before the event was invoked.
+            /// </summary>
+            public TimeOnly PreviousTime;
+            
             /// <summary>
             /// The formatted <c>TimeOnly</c> string according to the default time format of the
             /// clock that invoked the event.
             /// </summary>
             public string TimeString;
+            
+            /// <summary>
+            /// The formatted <c>TimeOnly</c> string of the previous time of clock according to
+            /// the default time format of the clock that invoked the event
+            /// </summary>
+            public string PreviousTimeString;
+            
+            /// <summary>
+            /// The <c>Duration</c> representing the timespan between the <c>Time</c> and
+            /// <c>PreviousTime</c> values of this event. Note that if time is moving forward,
+            /// then <c>DeltaTime</c> will be a positive timespan. If time is moving backwards,
+            /// <c>DeltaTime</c> will be a negative timespan.
+            /// </summary>
+            public Duration DeltaTime;
+            
+            /// <summary>
+            /// The proportion of the day elapsed relative to the start of the day, midnight. Note that
+            /// because midnight is both the start and end time of the day, the <c>DayProgress</c> is
+            /// bound in the range <c>[0,1)</c>.
+            /// </summary>
+            public float DayProgress;
+
+            /// <summary>
+            /// Creates a new instance of <c>OnTimeChangedEventArgs</c>.
+            /// </summary>
+            /// <param name="time">
+            /// The <c>TimeOnly</c> value of the clock when the event was invoked.
+            /// </param>
+            /// <param name="previousTime">
+            /// The previous <c>TimeOnly</c> value of the clock before the event was invoked.
+            /// </param>
+            /// <param name="format">
+            /// The format to apply to the <c>TimeOnly</c> values. By default, the format of
+            /// the <c>Clock</c> that is invoking this event should be passed.
+            /// </param>
+            public OnTimeChangedEventArgs(TimeOnly time, TimeOnly previousTime, string format)
+            {
+                Time = time;
+                PreviousTime = previousTime;
+                TimeString = time.ToString();
+                PreviousTimeString = previousTime.ToString(format);
+                DeltaTime = time - previousTime;
+                DayProgress = time.GetDayProgress();
+            }
+            
         }
         
         /// <summary>
@@ -37,7 +89,7 @@ namespace GameTime.Clock
             protected set
             {
                 HandleSetterEvents(value, out bool isTimeChanged);
-                if (isTimeChanged) OnTimeChanged?.Invoke(this, new OnTimeChangedEventArgs { Time = value, TimeString = value.ToString(Format) });
+                if (isTimeChanged) OnTimeChanged?.Invoke(this, new OnTimeChangedEventArgs(value, _time, Format));
                 _time = value;
             }
         }
@@ -155,7 +207,7 @@ namespace GameTime.Clock
             
             if (!_time.IsHourEqual(value))
             {
-                OnHourChanged?.Invoke(this, new OnTimeChangedEventArgs { Time = value,  TimeString = Time.ToString(Format) });
+                OnHourChanged?.Invoke(this, new OnTimeChangedEventArgs(value, _time, Format));
                 isTimeChanged = true;
             }
             
@@ -208,15 +260,17 @@ namespace GameTime.Clock
             
             isTimeChanged = false;
             
+            OnTimeChangedEventArgs eventArgs = new(value, _time, Format);
+            
             if (!_time.IsHourEqual(value))
             {
-                InvokeOnHourChanged(this, new OnTimeChangedEventArgs { Time = value,  TimeString = Time.ToString(Format) });
+                InvokeOnHourChanged(this, eventArgs);
                 isTimeChanged = true;
             }
             
             if (!_time.IsMinuteEqual(value))
             {
-                OnMinuteChanged?.Invoke(this, new OnTimeChangedEventArgs { Time = value,  TimeString = Time.ToString(Format) });
+                OnMinuteChanged?.Invoke(this, eventArgs);
                 isTimeChanged = true;
             }
             
@@ -270,22 +324,24 @@ namespace GameTime.Clock
         protected override void HandleSetterEvents(TimeOnly value, out bool isTimeChanged)
         {
             isTimeChanged = false;
+            
+            OnTimeChangedEventArgs eventArgs = new(value, _time, Format);
 
             if (!_time.IsHourEqual(value))
             {
-                InvokeOnHourChanged(this, new OnTimeChangedEventArgs { Time = value,  TimeString = Time.ToString(Format) });
+                InvokeOnHourChanged(this, eventArgs);
                 isTimeChanged = true;
             }
 
             if (!_time.IsMinuteEqual(value))
             {
-                InvokeOnMinuteChanged(this, new OnTimeChangedEventArgs { Time = value,  TimeString = Time.ToString(Format) });
+                InvokeOnMinuteChanged(this, eventArgs);
                 isTimeChanged = true;
             }
 
             if (!_time.IsSecondEqual(value))
             {
-                OnSecondChanged?.Invoke(this, new OnTimeChangedEventArgs { Time = value,  TimeString = Time.ToString(Format) });
+                OnSecondChanged?.Invoke(this, eventArgs);
                 isTimeChanged = true;
             }
             
@@ -340,28 +396,30 @@ namespace GameTime.Clock
         protected override void HandleSetterEvents(TimeOnly value, out  bool isTimeChanged)
         {
             isTimeChanged = false;
+            
+            OnTimeChangedEventArgs eventArgs = new(value, _time, Format);
 
             if (!_time.IsHourEqual(value))
             {
-                InvokeOnHourChanged(this, new OnTimeChangedEventArgs { Time = value,  TimeString = Time.ToString(Format) });
+                InvokeOnHourChanged(this, eventArgs);
                 isTimeChanged = true;
             }
 
             if (!_time.IsMinuteEqual(value))
             {
-                InvokeOnMinuteChanged(this, new OnTimeChangedEventArgs { Time = value,  TimeString = Time.ToString(Format) });
+                InvokeOnMinuteChanged(this, eventArgs);
                 isTimeChanged = true;
             }
 
             if (!_time.IsSecondEqual(value))
             {
-                InvokeOnSecondChanged(this, new OnTimeChangedEventArgs { Time = value,  TimeString = Time.ToString(Format) });
+                InvokeOnSecondChanged(this, eventArgs);
                 isTimeChanged = true;
             }
 
             if (!_time.IsMillisecondEqual(value))
             {
-                OnMillisecondChanged?.Invoke(this, new OnTimeChangedEventArgs { Time = value,  TimeString = Time.ToString(Format) });
+                OnMillisecondChanged?.Invoke(this, eventArgs);
                 isTimeChanged = true;
             }
             

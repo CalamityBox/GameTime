@@ -1,3 +1,15 @@
+## [1.0.1] - 2025-10-08
+
+### Changes
+
+Added the following properties to the `OnTimeChangedEventArgs` class:
+
+- `PreviousTime`: A `TimeOnly` representing the time at the frame before the event was invoked.
+- `PreviousTimeString`: A `string` representing the `PreviousTime` according to the default format of
+clock that invoked the event.
+- `DeltaTime`: A `Duration` representing the timespan between `Time` and `PreviousTime`.
+- `DayProgress`: A float representing the proportion of the day completed relative to the start of the day, midnight.
+
 ## [1.0.0] - 2025-10-01
 
 ## First Release

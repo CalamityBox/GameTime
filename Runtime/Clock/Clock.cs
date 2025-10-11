@@ -116,7 +116,7 @@ namespace GameTime.Clock
         /// equal to two in-game hours.
         /// </param>
         public void AdvanceTime(float scalar = 1)
-            => Time += scalar * new Duration(TimeConversions.SecondsToMilliseconds(UnityEngine.Time.deltaTime));
+            => Time += scalar * Duration.FromSeconds(UnityEngine.Time.deltaTime);
 
         /// <summary>
         /// Determines if the <c>Time</c> property of the clock is equal to another time at the

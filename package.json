@@ -1,10 +1,10 @@
 {
   "name": "com.gitamend.gametime",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "displayName": "Game Time",
   "description": "Contains time structs similar to the dotnet TimeOnly struct which is not available in Unity. Use to manage in-game time.",
   "author": {
     "name": "CalamityBox",
-    "url": ""
+    "url": "https://github.com/CalamityBox"
   }
 }

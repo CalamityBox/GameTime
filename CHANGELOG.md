@@ -1,3 +1,27 @@
+## [1.0.2] - 2025-10-11
+
+Implemented the following changes to the `TimeOnly` struct:
+
+- Added static methods for generating struct from a single type of non-millisecond unit.
+  - `TimeOnly.FromHours` creates a new `TimeOnly` where the time is equal to the specified number
+  of hours elapsed since midnight.
+  - `TimeOnly.FromMinutes` creates a new `TimeOnly` where the time is equal to the specified number
+    of minutes elapsed since midnight.
+  - `TimeOnly.FromSeconds` creates a new `TimeOnly` where the time is equal to the specified number
+    of seconds elapsed since midnight.
+
+Implemented the following changes to the `Duration` struct:
+
+- Added static methods for generating struct from a single type of non-millisecond unit.
+    - `Duration.FromDays` creates a new `Duration` where the timespan is equal to the specified number
+      of days elapsed.
+    - `Duration.FromHours` creates a new `Duration` where the timespan is equal to the specified number
+      of hours elapsed.
+    - `Duration.FromHours` creates a new `Duration` where the timespan is equal to the specified number
+      of minutes elapsed.
+    - `Duration.FromHours` creates a new `Duration` where the timespan is equal to the specified number
+      of seconds elapsed.
+
 ## [1.0.1] - 2025-10-08
 
 ### Changes

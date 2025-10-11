@@ -63,7 +63,7 @@ namespace GameTime.Clock
             {
                 Time = time;
                 PreviousTime = previousTime;
-                TimeString = time.ToString();
+                TimeString = time.ToString(format);
                 PreviousTimeString = previousTime.ToString(format);
                 DeltaTime = time - previousTime;
                 DayProgress = time.GetDayProgress();
@@ -73,12 +73,21 @@ namespace GameTime.Clock
         
         /// <summary>
         /// The <c>OnTimeChanged</c> event invokes whenever the <c>Time</c> recorded by the <c>Clock</c>
-        /// changes, down to the <c>Clock</c> object's level of specificity. Every <c>Clock</c> object
-        /// will track the full <c>TimeOnly</c> struct's level of precision behind the scenes, but a
-        /// <c>MinuteClock</c>, for example, will only invoke <c>OnTimeChanged</c> when the <c>Hour</c>
-        /// or <c>Minute</c> components of the <c>TimeOnly</c> struct have changed.
+        /// changes. In contrast to the <c>OnClockChanged</c> event, this event will invoke on a change at
+        /// any level of precision regardless of the clock type. For example, a <c>MinuteClock</c> will
+        /// invoke the event whenever the <c>Hour</c>, <c>Minute</c>, <c>Second</c>, or <c>Millisecond</c>
+        /// components have changed.
         /// </summary>
         public event EventHandler<OnTimeChangedEventArgs> OnTimeChanged;
+
+        /// <summary>
+        /// The <c>OnClockChanged</c> event invokes only when the <c>Time</c> of the clock maximum level of precision has
+        /// changed. For example, a <c>MinuteClock</c> will only invoke this event when the <c>Hour</c> or
+        /// <c>Minute</c> components have changed, but not the <c>Second</c> or <c>Millisecond</c> components.
+        /// This invent is intended to represent when the clock's default formatting setting, such as
+        /// <c>HH:mm</c>, would need to update.
+        /// </summary>
+        public event EventHandler<OnTimeChangedEventArgs> OnClockChanged;
         
         /// <summary>
         /// The current time of the <c>Clock</c>.
@@ -88,9 +97,10 @@ namespace GameTime.Clock
             get => _time;
             protected set
             {
-                HandleSetterEvents(value, out bool isTimeChanged);
-                if (isTimeChanged) OnTimeChanged?.Invoke(this, new OnTimeChangedEventArgs(value, _time, Format));
+                if (value == _time) return;
+                TimeOnly previousFrameTime = _time;
                 _time = value;
+                OnTimeChanged?.Invoke(this, new OnTimeChangedEventArgs(_time, previousFrameTime, Format));
             }
         }
 
@@ -104,6 +114,15 @@ namespace GameTime.Clock
         public string Format { get; set; }
         
         protected TimeOnly _time;
+        protected TimeOnly _previousTime;
+
+        protected BaseClock(TimeOnly time, string format)
+        {
+            _time = time;
+            Format = format;
+            OnTimeChanged += BaseClock_OnTimeChanged;
+            OnClockChanged += BaseClock_OnClockChanged;
+        }
         
         /// <summary>
         /// The <c>AdvanceTime</c> method advances the <c>Time</c> property linearly by a factor
@@ -131,32 +150,17 @@ namespace GameTime.Clock
         /// of precision specified by the inheriting class. Returns <c>false</c> otherwise.
         /// </returns>
         public abstract bool IsEqualTo(TimeOnly time);
-        
-        /// <summary>
-        /// Method to invoke the <c>BaseClock</c> class' <c>OnTimeChanged</c> event. The event should
-        /// invoke only once when any of the <c>TimeOnly</c> components changes according to the
-        /// specification in the inheriting class.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected void InvokeOnTimeChanged(object sender, OnTimeChangedEventArgs e)
-            => OnTimeChanged?.Invoke(sender, e);
 
-        /// <summary>
-        /// The <c>HandleSetterEvents</c> method is intended to evaluate the incoming time in the
-        /// <c>set</c> method of <c>BaseClock</c> for changes and invoke component-level time changed
-        /// events such as <c>OnMinuteChanged</c>. Finally, it returns an out parameter <c>isTimeChanged</c>
-        /// that is used by the <c>set</c> method to invoke the base class' <c>OnTimeChanged</c> event.
-        /// </summary>
-        /// <param name="value">The new <c>TimeOnly</c> value of the clock.</param>
-        /// <param name="isTimeChanged">
-        /// Out parameter that is <c>true</c> when the new time <c>value</c> is different from the
-        /// <c>Time</c> currently stored by the <c>Clock</c> at the specified level of precision by the
-        /// inheriting class. Returns <c>false</c> when the times are equal at the specified level of
-        /// precision.
-        /// </param>
-        protected virtual void HandleSetterEvents(TimeOnly value, out bool isTimeChanged)
-            => isTimeChanged = false;
+        private void BaseClock_OnTimeChanged(object sender, OnTimeChangedEventArgs e)
+        {
+            if (!IsEqualTo(e.PreviousTime))
+            {
+                OnClockChanged?.Invoke(this, new OnTimeChangedEventArgs(e.Time, _previousTime, Format));
+            }
+        }
+
+        private void BaseClock_OnClockChanged(object sender, OnTimeChangedEventArgs e)
+            => _previousTime = e.Time;
 
     }
     
@@ -180,11 +184,8 @@ namespace GameTime.Clock
         /// </summary>
         /// <param name="time">The initial time of the clock.</param>
         /// <param name="format">The default format of the clock.</param>
-        public HourClock(TimeOnly time, string format = "h tt")
-        {
-            _time = time;
-            Format = format;
-        }
+        public HourClock(TimeOnly time, string format = "h tt") : base(time, format)
+            => OnTimeChanged += HourClock_OnTimeChanged;
 
         /// <summary>
         /// Determines if the <c>Time</c> property of the clock is equal to another time at the
@@ -198,23 +199,12 @@ namespace GameTime.Clock
         /// Returns <c>false</c> otherwise.
         /// </returns>
         public override bool IsEqualTo(TimeOnly time)
-            => Time.Hour == time.Hour;
-        
-        protected override void HandleSetterEvents(TimeOnly value, out bool isTimeChanged)
-        {
-            
-            isTimeChanged = false;
-            
-            if (!_time.IsHourEqual(value))
-            {
-                OnHourChanged?.Invoke(this, new OnTimeChangedEventArgs(value, _time, Format));
-                isTimeChanged = true;
-            }
-            
-        }
+            => Time.IsHourEqual(time);
 
-        protected void InvokeOnHourChanged(object sender, OnTimeChangedEventArgs e)
-            => OnHourChanged?.Invoke(sender, e);
+        private void HourClock_OnTimeChanged(object sender, OnTimeChangedEventArgs e)
+        {
+            if (!IsEqualTo(e.PreviousTime)) OnHourChanged?.Invoke(this, e);
+        }
 
     }
 
@@ -238,7 +228,8 @@ namespace GameTime.Clock
         /// </summary>
         /// <param name="time">The initial time of the clock.</param>
         /// <param name="format">The default format of the clock.</param>
-        public MinuteClock(TimeOnly time, string format = "h:mm tt") : base(time, format) {}
+        public MinuteClock(TimeOnly time, string format = "h:mm tt") : base(time, format)
+            => OnTimeChanged += MinuteClock_OnTimeChanged;
         
         /// <summary>
         /// Determines if the <c>Time</c> property of the clock is equal to another time at the
@@ -252,32 +243,13 @@ namespace GameTime.Clock
         /// and <c>Minute</c> of the input. Returns <c>false</c> otherwise.
         /// </returns>
         public override bool IsEqualTo(TimeOnly time)
-            => Time.Hour == time.Hour &
-               Time.Minute == time.Minute;
-        
-        protected override void HandleSetterEvents(TimeOnly value, out bool isTimeChanged)
-        {
-            
-            isTimeChanged = false;
-            
-            OnTimeChangedEventArgs eventArgs = new(value, _time, Format);
-            
-            if (!_time.IsHourEqual(value))
-            {
-                InvokeOnHourChanged(this, eventArgs);
-                isTimeChanged = true;
-            }
-            
-            if (!_time.IsMinuteEqual(value))
-            {
-                OnMinuteChanged?.Invoke(this, eventArgs);
-                isTimeChanged = true;
-            }
-            
-        }
+            => Time.IsHourEqual(time) &
+               Time.IsMinuteEqual(time);
 
-        protected void InvokeOnMinuteChanged(object sender, OnTimeChangedEventArgs e)
-            => OnMinuteChanged?.Invoke(this, e);
+        private void MinuteClock_OnTimeChanged(object sender, OnTimeChangedEventArgs e)
+        {
+            if (!IsEqualTo(e.PreviousTime)) OnMinuteChanged?.Invoke(this, e);
+        }
         
     }
 
@@ -302,7 +274,8 @@ namespace GameTime.Clock
         /// </summary>
         /// <param name="time">The initial time of the clock.</param>
         /// <param name="format">The default format of the clock.</param>
-        public SecondClock(TimeOnly time, string format = "h:mm:ss tt") : base(time, format) {}
+        public SecondClock(TimeOnly time, string format = "h:mm:ss tt") : base(time, format)
+            => OnTimeChanged += SecondClock_OnTimeChanged;
         
         /// <summary>
         /// Determines if the <c>Time</c> property of the clock is equal to another time at the
@@ -317,38 +290,14 @@ namespace GameTime.Clock
         /// <c>false</c> otherwise.
         /// </returns>
         public override bool IsEqualTo(TimeOnly time)
-            => Time.Hour == time.Hour &
-               Time.Minute == time.Minute &
-               Time.Second == time.Second;
-        
-        protected override void HandleSetterEvents(TimeOnly value, out bool isTimeChanged)
+            => Time.IsHourEqual(time) &
+               Time.IsMinuteEqual(time) &
+               Time.IsSecondEqual(time);
+
+        private void SecondClock_OnTimeChanged(object sender, OnTimeChangedEventArgs e)
         {
-            isTimeChanged = false;
-            
-            OnTimeChangedEventArgs eventArgs = new(value, _time, Format);
-
-            if (!_time.IsHourEqual(value))
-            {
-                InvokeOnHourChanged(this, eventArgs);
-                isTimeChanged = true;
-            }
-
-            if (!_time.IsMinuteEqual(value))
-            {
-                InvokeOnMinuteChanged(this, eventArgs);
-                isTimeChanged = true;
-            }
-
-            if (!_time.IsSecondEqual(value))
-            {
-                OnSecondChanged?.Invoke(this, eventArgs);
-                isTimeChanged = true;
-            }
-            
+            if (!IsEqualTo(e.PreviousTime)) OnSecondChanged?.Invoke(this, e);
         }
-        
-        protected void InvokeOnSecondChanged(object sender, OnTimeChangedEventArgs e)
-            => OnSecondChanged?.Invoke(this, e);
         
     }
 
@@ -373,7 +322,8 @@ namespace GameTime.Clock
         /// </summary>
         /// <param name="time">The initial time of the clock.</param>
         /// <param name="format">The default format of the clock.</param>
-        public MillisecondClock(TimeOnly time, string format = "h:mm:ss:fff tt") : base(time, format) {}
+        public MillisecondClock(TimeOnly time, string format = "h:mm:ss:fff tt") : base(time, format)
+            => OnTimeChanged += MillisecondClock_OnTimeChanged;
         
         /// <summary>
         /// Determines if the <c>Time</c> property of the clock is equal to another time at the
@@ -392,37 +342,10 @@ namespace GameTime.Clock
         /// and <c>Millisecond</c> of the input. Returns <c>false</c> otherwise.
         /// </returns>
         public override bool IsEqualTo(TimeOnly time) => Time == time;
-        
-        protected override void HandleSetterEvents(TimeOnly value, out  bool isTimeChanged)
+
+        private void MillisecondClock_OnTimeChanged(object sender, OnTimeChangedEventArgs e)
         {
-            isTimeChanged = false;
-            
-            OnTimeChangedEventArgs eventArgs = new(value, _time, Format);
-
-            if (!_time.IsHourEqual(value))
-            {
-                InvokeOnHourChanged(this, eventArgs);
-                isTimeChanged = true;
-            }
-
-            if (!_time.IsMinuteEqual(value))
-            {
-                InvokeOnMinuteChanged(this, eventArgs);
-                isTimeChanged = true;
-            }
-
-            if (!_time.IsSecondEqual(value))
-            {
-                InvokeOnSecondChanged(this, eventArgs);
-                isTimeChanged = true;
-            }
-
-            if (!_time.IsMillisecondEqual(value))
-            {
-                OnMillisecondChanged?.Invoke(this, eventArgs);
-                isTimeChanged = true;
-            }
-            
+            if (!IsEqualTo(e.PreviousTime)) OnMillisecondChanged?.Invoke(this, e);
         }
 
     }

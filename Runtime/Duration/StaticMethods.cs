@@ -39,7 +39,7 @@ namespace GameTime
         /// </summary>
         /// <param name="seconds">The number of seconds elapsed.</param>
         /// <returns>A new <c>Duration</c>.</returns>
-        public static Duration FromSeconds(float seconds) => FromSeconds((int)seconds);
+        public static Duration FromSeconds(float seconds) => new(SecondsToMilliseconds(seconds));
         
     }
     

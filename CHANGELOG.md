@@ -1,3 +1,20 @@
+# [1.1.0] - 2025-10-11
+
+Implemented the following changes to the `Clock` class:
+
+- Reworked the `OnTimeChanged` event to correspond to **any** change in the clock's `Time` property.
+- Moved previous behavior of `OnTimeChanged` into a new event, `OnClockChanged`.
+- Updated the `IsEqual` methods of the inheriting clock classes to utilize the built-in `TimeOnly`
+comparison methods, `IsHourEqual`, `IsMinuteEqual`, `IsSecondEqual`.
+- Removed the `HandleSetterEvents` method and implementations.
+- Reworked `BaseClock` to handle the `OnClockChanged` event for all inherting clocks by utilizing
+the overriden `IsEqual` method.
+- Reworked class constructors to assign their own `Time` component changed events.
+
+Implemented the following changes to the `Duration` struct:
+
+- Fixed a casting error in the `FromSeconds` float method.
+
 ## [1.0.2] - 2025-10-11
 
 Implemented the following changes to the `TimeOnly` struct:

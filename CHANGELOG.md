@@ -11,6 +11,10 @@ comparison methods, `IsHourEqual`, `IsMinuteEqual`, `IsSecondEqual`.
 the overriden `IsEqual` method.
 - Reworked class constructors to assign their own `Time` component changed events.
 
+Implemented the following changes to the `Duration` struct:
+
+- Fixed a casting error in the `FromSeconds` float method.
+
 ## [1.0.2] - 2025-10-11
 
 Implemented the following changes to the `TimeOnly` struct:
